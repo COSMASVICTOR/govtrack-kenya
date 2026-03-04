@@ -75,68 +75,196 @@ export const AdminDashboard = () => {
 // ─── AdminDocuments ───────────────────────────────────────────────────────────
 export const AdminDocuments = () => {
   const [docs, setDocs] = useState([]);
-  const [editing, setEditing] = useState(null);
-  const [newStatus, setNewStatus] = useState('');
-  const [saved, setSaved] = useState(null);
+  const [lostReports, setLostReports] = useState([]);
+  const [foundItems, setFoundItems] = useState([]);
+  const [activeTab, setActiveTab] = useState('documents');
   const [loading, setLoading] = useState(true);
+  const [editDoc, setEditDoc] = useState(null);
+  const [newStatus, setNewStatus] = useState('');
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    getAdminDocuments().then(res => setDocs(res.data)).finally(() => setLoading(false));
+    const fetchAll = async () => {
+      try {
+        const [docsRes, lostRes, foundRes] = await Promise.all([
+          getAdminDocuments(),
+          API.get('/admin/lost-reports'),
+          API.get('/admin/found-items'),
+        ]);
+        setDocs(docsRes.data);
+        setLostReports(lostRes.data);
+        setFoundItems(foundRes.data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAll();
   }, []);
 
-  const handleUpdate = async (docId) => {
+  const handleSave = async () => {
+    if (!newStatus) return;
+    setSaving(true);
     try {
-      const res = await updateDocumentStatus(docId, newStatus);
-      setDocs(prev => prev.map(d => d._id === docId ? res.data : d));
-      setSaved(docId);
-      setEditing(null);
-      setTimeout(() => setSaved(null), 2000);
+      await API.patch(`/admin/documents/${editDoc._id}`, { status: newStatus });
+      setDocs(d => d.map(doc => doc._id === editDoc._id ? { ...doc, status: newStatus, updatedDate: new Date().toISOString().split('T')[0] } : doc));
+      setEditDoc(null);
     } catch (err) {
-      console.error('Update failed:', err);
+      console.error(err);
+    } finally {
+      setSaving(false);
     }
   };
 
-  if (loading) return <div style={{ textAlign: 'center', padding: 60, color: '#6b7280' }}>Loading...</div>;
+  const TABS = [
+    { id: 'documents', label: '📄 Registered Docs', count: docs.length },
+    { id: 'lost',      label: '🚨 Lost Reports',    count: lostReports.length },
+    { id: 'found',     label: '📥 Found Items',     count: foundItems.length },
+  ];
+
+  if (loading) return <div style={{ padding: 40, textAlign: 'center', color: '#6b7280' }}>Loading...</div>;
 
   return (
     <div className="fade-in">
       <h1 style={{ fontSize: 22, fontWeight: 800, marginBottom: 4 }}>Document Management</h1>
-      <p style={{ color: '#6b7280', fontSize: 14, marginBottom: 24 }}>View and update document statuses</p>
-      <div className="table-wrap">
-        <table>
-          <thead><tr><th>Type</th><th>Doc Number</th><th>Owner</th><th>Office</th><th>Status</th><th>Updated</th><th>Action</th></tr></thead>
-          <tbody>
-            {docs.map(doc => (
-              <tr key={doc._id}>
-                <td><div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><DocTypeIcon type={doc.type} /><span style={{ fontSize: 12 }}>{doc.type}</span></div></td>
-                <td><span style={{ fontFamily: "'DM Mono',monospace", fontSize: 13 }}>{doc.docNumber}</span></td>
-                <td>{doc.owner?.name || '—'}</td>
-                <td style={{ fontSize: 12, color: '#6b7280' }}>{doc.office}</td>
-                <td>
-                  {saved === doc._id
-                    ? <span className="badge badge-found"><Icon name="check" size={11} />Saved!</span>
-                    : editing === doc._id
-                      ? <div style={{ display: 'flex', gap: 6 }}>
-                          <select className="select-field" style={{ width: 160, padding: '6px 10px', fontSize: 13 }} value={newStatus} onChange={e => setNewStatus(e.target.value)}>
-                            {['Processing', 'Ready for Collection', 'Collected'].map(s => <option key={s}>{s}</option>)}
-                          </select>
-                          <button className="btn-primary" style={{ padding: '6px 12px', fontSize: 12 }} onClick={() => handleUpdate(doc._id)}>Save</button>
-                          <button className="btn-secondary" style={{ padding: '6px 10px', fontSize: 12 }} onClick={() => setEditing(null)}>✕</button>
-                        </div>
-                      : <StatusBadge status={doc.status} />
-                  }
-                </td>
-                <td style={{ fontSize: 13, color: '#6b7280' }}>{doc.updatedDate}</td>
-                <td>
-                  <button className="btn-secondary" style={{ padding: '6px 12px', fontSize: 12 }} onClick={() => { setEditing(doc._id); setNewStatus(doc.status); }}>
-                    <Icon name="edit" size={12} /> Edit
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <p style={{ color: '#6b7280', fontSize: 14, marginBottom: 20 }}>Unified view of all documents, lost reports and found items</p>
+
+      {/* Tabs */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
+        {TABS.map(t => (
+          <button key={t.id} onClick={() => setActiveTab(t.id)}
+            style={{ padding: '9px 18px', borderRadius: 10, border: '1.5px solid', cursor: 'pointer', fontFamily: "'Sora',sans-serif", fontWeight: 600, fontSize: 13, transition: 'all 0.15s',
+              background: activeTab === t.id ? '#0a5c36' : 'white',
+              color: activeTab === t.id ? 'white' : '#374151',
+              borderColor: activeTab === t.id ? '#0a5c36' : 'var(--border)',
+            }}>
+            {t.label} <span style={{ background: activeTab === t.id ? 'rgba(255,255,255,0.25)' : '#f3f4f6', borderRadius: 99, padding: '1px 7px', fontSize: 11, marginLeft: 4 }}>{t.count}</span>
+          </button>
+        ))}
       </div>
+
+      {/* Registered Documents Tab */}
+      {activeTab === 'documents' && (
+        <div className="card">
+          <div className="table-wrap">
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr>
+                  {['Type', 'Doc Number', 'Owner', 'Office', 'Status', 'Updated', 'Action'].map(h => (
+                    <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: '#6b7280', borderBottom: '1px solid var(--border)', background: '#f9fafb' }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {docs.map(doc => (
+                  <tr key={doc._id} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                    <td style={{ padding: '12px 16px', fontSize: 13 }}><Icon name="file" size={14} /> {doc.type}</td>
+                    <td style={{ padding: '12px 16px', fontSize: 13, fontWeight: 600 }}>{doc.docNumber}</td>
+                    <td style={{ padding: '12px 16px', fontSize: 13 }}>{doc.owner?.name || 'N/A'}</td>
+                    <td style={{ padding: '12px 16px', fontSize: 12, color: '#6b7280' }}>{doc.office}</td>
+                    <td style={{ padding: '12px 16px' }}><StatusBadge status={doc.status} /></td>
+                    <td style={{ padding: '12px 16px', fontSize: 12, color: '#6b7280' }}>{doc.updatedDate}</td>
+                    <td style={{ padding: '12px 16px' }}>
+                      <button className="btn-secondary" style={{ padding: '6px 12px', fontSize: 12 }} onClick={() => { setEditDoc(doc); setNewStatus(doc.status); }}>
+                        <Icon name="file" size={12} /> Edit
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Lost Reports Tab */}
+      {activeTab === 'lost' && (
+        <div className="card">
+          <div className="table-wrap">
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr>
+                  {['Type', 'Doc Number', 'Reported By', 'Phone', 'Lost Location', 'Date', 'Status', 'Matched?'].map(h => (
+                    <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: '#6b7280', borderBottom: '1px solid var(--border)', background: '#f9fafb' }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {lostReports.map(r => (
+                  <tr key={r._id} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                    <td style={{ padding: '12px 16px', fontSize: 13 }}>{r.docType}</td>
+                    <td style={{ padding: '12px 16px', fontSize: 13, fontWeight: 600 }}>{r.docNumber}</td>
+                    <td style={{ padding: '12px 16px', fontSize: 13 }}>{r.reportedBy?.name || 'N/A'}</td>
+                    <td style={{ padding: '12px 16px', fontSize: 12, color: '#6b7280' }}>{r.reportedBy?.phone || 'N/A'}</td>
+                    <td style={{ padding: '12px 16px', fontSize: 12, color: '#6b7280' }}>{r.lostLocation}</td>
+                    <td style={{ padding: '12px 16px', fontSize: 12, color: '#6b7280' }}>{r.lostDate}</td>
+                    <td style={{ padding: '12px 16px' }}><StatusBadge status={r.status} /></td>
+                    <td style={{ padding: '12px 16px', fontSize: 13, color: r.matchedItem ? '#15803d' : '#6b7280', fontWeight: r.matchedItem ? 700 : 400 }}>
+                      {r.matchedItem ? '✅ Yes' : '—'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Found Items Tab */}
+      {activeTab === 'found' && (
+        <div className="card">
+          <div className="table-wrap">
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr>
+                  {['Type', 'Doc Number', 'Owner', 'Found At', 'Deposited At', 'Date', 'Status'].map(h => (
+                    <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: '#6b7280', borderBottom: '1px solid var(--border)', background: '#f9fafb' }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {foundItems.map(f => (
+                  <tr key={f._id} style={{ borderBottom: '1px solid #f3f4f6' }}>
+                    <td style={{ padding: '12px 16px', fontSize: 13 }}>{f.docType}</td>
+                    <td style={{ padding: '12px 16px', fontSize: 13, fontWeight: 600 }}>{f.docNumber}</td>
+                    <td style={{ padding: '12px 16px', fontSize: 13 }}>{f.ownerName}</td>
+                    <td style={{ padding: '12px 16px', fontSize: 12, color: '#6b7280' }}>{f.foundLocation}</td>
+                    <td style={{ padding: '12px 16px', fontSize: 12, color: '#6b7280' }}>{f.depositedAt}</td>
+                    <td style={{ padding: '12px 16px', fontSize: 12, color: '#6b7280' }}>{f.foundDate}</td>
+                    <td style={{ padding: '12px 16px' }}><StatusBadge status={f.status || 'Awaiting Owner'} /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {editDoc && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999 }}>
+          <div className="card modal-box" style={{ width: 400, padding: 32 }}>
+            <h3 style={{ fontWeight: 800, marginBottom: 16 }}>Update Document Status</h3>
+            <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 20 }}>{editDoc.type} — {editDoc.docNumber}</p>
+            <label className="label">New Status</label>
+            <select className="select-field" value={newStatus} onChange={e => setNewStatus(e.target.value)}>
+              <option>Processing</option>
+              <option>Ready for Collection</option>
+              <option>Collected</option>
+              <option>Rejected</option>
+            </select>
+            <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>
+              <button className="btn-primary" style={{ flex: 1, justifyContent: 'center' }} onClick={handleSave} disabled={saving}>
+                {saving ? 'Saving...' : 'Save'}
+              </button>
+              <button className="btn-secondary" style={{ flex: 1, justifyContent: 'center' }} onClick={() => setEditDoc(null)}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

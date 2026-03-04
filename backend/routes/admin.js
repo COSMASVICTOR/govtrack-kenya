@@ -156,5 +156,23 @@ router.get('/users', async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch users.', error: err.message });
   }
 });
+// @route GET /api/admin/lost-reports
+router.get('/lost-reports', protect, adminOnly, async (req, res) => {
+  try {
+    const reports = await LostReport.find().populate('reportedBy', 'name phone email').sort({ createdAt: -1 });
+    res.json(reports);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 
+// @route GET /api/admin/found-items
+router.get('/found-items', protect, adminOnly, async (req, res) => {
+  try {
+    const items = await FoundItem.find().populate('loggedBy', 'name email').sort({ createdAt: -1 });
+    res.json(items);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 module.exports = router;
