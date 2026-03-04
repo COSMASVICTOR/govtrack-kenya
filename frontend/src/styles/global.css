@@ -216,65 +216,16 @@ body[data-theme='dark'] .theme-toggle:hover {
 }
 /* ── Mobile Responsive ─────────────────────── */
 @media (max-width: 768px) {
+  .desktop-sidebar { display: none !important; }
+  .hamburger-btn   { display: flex !important; }
+  .mobile-sidebar  { display: block !important; }
 
-  /* Keep sidebar on left but make it narrower */
-  .sidebar {
-    width: 60px;
-    min-height: 100vh;
-    flex-direction: column;
-    position: fixed;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    border-right: 1px solid var(--border);
-    z-index: 100;
-    padding: 0;
-    overflow: hidden;
-  }
-
-  /* Hide text labels, show only icons */
-  .nav-link span,
-  .sidebar-logo div,
-  .sidebar-user div {
-    display: none;
-  }
-
-  .nav-link {
-    justify-content: center;
-    padding: 12px 0;
-    width: 100%;
-    border-radius: 0;
-  }
-
-  /* Hide logo text, keep icon */
-  .sidebar-logo {
-    padding: 16px 0 !important;
-    justify-content: center;
-    display: flex;
-  }
-
-  /* Hide user info text */
-  .sidebar-user {
-    padding: 12px 0 !important;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  /* Push main area to the right of narrow sidebar */
   .main-area {
-    margin-left: 60px;
-    padding: 16px;
-    max-height: 100vh;
-    overflow-y: auto;
+    margin-left: 0 !important;
+    padding: 64px 16px 24px 16px;
   }
 
-  /* Stack stat cards 2 per row */
   div[style*="grid-template-columns: repeat(4"] {
-    grid-template-columns: 1fr 1fr !important;
-  }
-
-  div[style*="grid-template-columns: repeat(3"] {
     grid-template-columns: 1fr 1fr !important;
   }
 
@@ -282,50 +233,11 @@ body[data-theme='dark'] .theme-toggle:hover {
     grid-template-columns: 1fr !important;
   }
 
-  /* Table horizontal scroll */
-  .table-wrap {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  table {
-    min-width: 500px;
-  }
-
-  /* Modal full width on mobile */
-  .modal-box {
-    margin: 16px;
-    padding: 20px;
-    max-width: calc(100% - 32px);
-  }
-
-  /* Smaller headings */
+  .table-wrap { overflow-x: auto; }
+  table { min-width: 500px; }
   h1 { font-size: 18px !important; }
-
-  /* Notification dropdown adjust */
-  .notif-dropdown {
-    right: -80px !important;
-    width: 280px !important;
-  }
-
-  /* Help button stays visible */
-  .help-float {
-    bottom: 16px;
-    right: 16px;
-  }
 }
 
 @media (max-width: 480px) {
-  .main-area {
-    margin-left: 60px;
-    padding: 12px;
-  }
-
-  .stat-card {
-    padding: 12px;
-  }
-
-  .doc-card {
-    padding: 12px 14px;
-  }
+  .main-area { padding: 64px 12px 24px 12px; }
 }
