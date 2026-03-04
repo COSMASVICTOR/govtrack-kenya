@@ -105,9 +105,9 @@ const Sidebar = ({ active, onChange, user, onLogout }) => {
 
       {/* ── Mobile Slide-out Sidebar ── */}
       <div
-        className="mobile-sidebar"
-        style={{ position: 'fixed', top: 0, left: mobileOpen ? 0 : '-280px', width: 260, height: '100vh', zIndex: 1003, transition: 'left 0.3s ease', background: 'white', boxShadow: '4px 0 20px rgba(0,0,0,0.15)', display: 'none' }}
-      >
+  className="mobile-sidebar"
+  style={{ position: 'fixed', top: 0, left: mobileOpen ? 0 : '-280px', width: 260, height: '100vh', zIndex: 1003, transition: 'left 0.3s ease', background: 'white', boxShadow: '4px 0 20px rgba(0,0,0,0.15)', display: 'none', overflowY: 'auto' }}
+>
         <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '12px 12px 0' }}>
           <button onClick={() => setMobileOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 20, color: '#6b7280' }}>✕</button>
         </div>
