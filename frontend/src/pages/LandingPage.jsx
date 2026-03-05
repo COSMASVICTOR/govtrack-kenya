@@ -50,7 +50,7 @@ const LandingPage = ({ onNavigate }) => {
 
       {/* STATS */}
       <div style={{ display: 'flex', justifyContent: 'center', gap: 48, padding: '40px 48px', borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        {[['4', 'Document Types'], ['Real-time', 'Status Tracking'], ['JWT Secure', 'Authentication'], ['Centralized', 'Lost & Found']].map(([val, label]) => (
+        {[['Multi-Document', 'Many Document Types'], ['Real-time', 'Status Tracking'], ['JWT Secure', 'Authentication'], ['Centralized', 'Lost & Found']].map(([val, label]) => (
           <div key={label} style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 28, fontWeight: 800, color: '#22c55e' }}>{val}</div>
             <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginTop: 4 }}>{label}</div>
