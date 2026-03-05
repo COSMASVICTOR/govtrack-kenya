@@ -17,7 +17,6 @@ const Sidebar = ({ active, onChange, user, onLogout }) => {
 
   const adminLinks = [
     { id: 'admin-dashboard',  icon: 'home',   label: 'Dashboard'       },
-    { id: 'admin-documents',  icon: 'file',   label: 'All Documents'   },
     { id: 'admin-found',      icon: 'inbox',  label: 'Found Items Mgmt'},
     { id: 'admin-lost',       icon: 'list',   label: 'Lost Reports'    },
     { id: 'admin-users',      icon: 'user',   label: 'Users'           },
