@@ -355,7 +355,26 @@ export const AdminFound = () => {
                 <td style={{ fontSize: 13, color: '#6b7280' }}>{item.foundLocation}</td>
                 <td style={{ fontSize: 13 }}>{item.depositedAt}</td>
                 <td style={{ fontSize: 13, color: '#6b7280' }}>{item.foundDate}</td>
-                <td><StatusBadge status={item.status} /></td>
+                <td>
+  <select
+    className="select-field"
+    style={{ padding: '6px 10px', fontSize: 12, width: 170 }}
+    value={item.status || 'Awaiting Owner'}
+    onChange={async (e) => {
+      const newSt = e.target.value;
+      try {
+        await API.patch(`/admin/found-items/${item._id}`, { status: newSt });
+        setItems(prev => prev.map(f => f._id === item._id ? { ...f, status: newSt } : f));
+      } catch (err) { console.error(err); }
+    }}
+  >
+    <option>Awaiting Owner</option>
+    <option>Collected</option>
+    <option>Transferred to Police</option>
+    <option>Transferred to Huduma</option>
+    <option>Unclaimed - Archived</option>
+  </select>
+</td>
               </tr>
             ))}
           </tbody>

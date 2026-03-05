@@ -175,4 +175,14 @@ router.get('/found-items', protect, adminOnly, async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+router.patch('/found-items/:id', protect, adminOnly, async (req, res) => {
+  try {
+    const item = await FoundItem.findByIdAndUpdate(
+      req.params.id, { status: req.body.status }, { new: true }
+    );
+    res.json(item);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 module.exports = router;
