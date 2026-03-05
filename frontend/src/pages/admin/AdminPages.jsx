@@ -363,7 +363,7 @@ export const AdminFound = () => {
     onChange={async (e) => {
       const newSt = e.target.value;
       try {
-        await API.patch(`/admin/found-items/${item._id}`, { status: newSt });
+        await updateFoundItemStatus(item._id, newSt);
         setItems(prev => prev.map(f => f._id === item._id ? { ...f, status: newSt } : f));
       } catch (err) { console.error(err); }
     }}

@@ -18,7 +18,7 @@ const foundItemSchema = new mongoose.Schema({
   depositedAt: { type: String, required: true },
   status: {
     type: String,
-    enum: ['Awaiting Owner', 'Claimed', 'Collected'],
+    enum: ['Awaiting Owner', 'Collected', 'Transferred to Police', 'Transferred to Huduma', 'Unclaimed - Archived'],
     default: 'Awaiting Owner',
   },
   loggedBy: {

@@ -38,7 +38,7 @@ export const updateDocumentStatus = (id, status) => API.patch(`/admin/documents/
 export const getAdminLostReports = () => API.get('/admin/lost-reports');
 export const getAdminFoundItems = () => API.get('/admin/found-items');
 export const logFoundItem = (data) => API.post('/admin/found-items', data);
-export const updateFoundItemStatus = (id, status) => API.patch(`/admin/found-items/${id}/status`, { status });
+export const updateFoundItemStatus = (id, status) => API.patch(`/admin/found-items/${id}`, { status });
 export const getAdminUsers = () => API.get('/admin/users');
 
 export default API;
