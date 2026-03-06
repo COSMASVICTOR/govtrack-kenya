@@ -34,7 +34,7 @@ router.post('/', protect, async (req, res) => {
     }
 
     // Send confirmation email
-await sendEmail({
+sendEmail({
   to: req.user.email,
   subject: '🔴 Lost Document Report Received - GovTrack Kenya',
   html: `

@@ -95,7 +95,7 @@ const matchedReports = await LostReport.find({
 
 for (const report of matchedReports) {
   if (report.reportedBy?.email) {
-    await sendEmail({
+    sendEmail({
       to: report.reportedBy.email,
       subject: '🎉 Your Lost Document Has Been Found! - GovTrack Kenya',
       html: `
