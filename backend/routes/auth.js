@@ -1,3 +1,4 @@
+const sendEmail = require('../utils/sendEmail');
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
@@ -28,6 +29,39 @@ router.post('/register', async (req, res) => {
     }
 
     const user = await User.create({ name, email, phone, nationalId, password });
+
+// Welcome email (non-blocking)
+sendEmail({
+  to: user.email,
+  subject: '🎉 Welcome to GovTrack Kenya!',
+  html: `
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
+      <div style="background:#0a5c36;padding:24px;border-radius:12px 12px 0 0">
+        <h2 style="color:white;margin:0">GovTrack Kenya</h2>
+        <p style="color:rgba(255,255,255,0.8);margin:4px 0 0">Document Tracking System</p>
+      </div>
+      <div style="background:#f9fafb;padding:28px;border-radius:0 0 12px 12px;border:1px solid #e5e7eb">
+        <h3 style="color:#111827">Welcome, ${user.name}! 🎉</h3>
+        <p style="color:#374151">Your account has been <strong>successfully created</strong> on GovTrack Kenya.</p>
+        <div style="background:white;border-radius:10px;padding:20px;margin:20px 0;border:1px solid #e5e7eb">
+          <p style="margin:0 0 8px"><strong>Name:</strong> ${user.name}</p>
+          <p style="margin:0 0 8px"><strong>Email:</strong> ${user.email}</p>
+          <p style="margin:0"><strong>National ID:</strong> ${user.nationalId}</p>
+        </div>
+        <p style="color:#374151">You can now:</p>
+        <ul style="color:#374151;padding-left:20px">
+          <li>Track your government documents</li>
+          <li>Report lost documents</li>
+          <li>Get notified when your documents are found</li>
+        </ul>
+        <a href="https://govtrack-kenya.vercel.app" style="display:inline-block;background:#0a5c36;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;margin-top:16px">Login to GovTrack</a>
+        <hr style="margin:24px 0;border:none;border-top:1px solid #e5e7eb"/>
+        <p style="color:#9ca3af;font-size:12px">GovTrack Kenya · Machakos County · Kenya Digital Government Initiative 2026</p>
+      </div>
+    </div>
+  `,
+});
+
     const token = signToken(user._id);
 
     res.status(201).json({
