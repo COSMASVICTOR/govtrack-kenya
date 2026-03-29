@@ -1,19 +1,12 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const sendEmail = async ({ to, subject, html }) => {
+  console.log('📧 Attempting to send email to:', to);
   try {
-    const transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 465,
-      secure: true,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
-    await transporter.sendMail({
-      from: `"GovTrack Kenya" <${process.env.EMAIL_USER}>`,
+    await resend.emails.send({
+      from: 'GovTrack Kenya <onboarding@resend.dev>',
       to,
       subject,
       html,
