@@ -106,15 +106,6 @@ The `"proxy": "http://localhost:5000"` in `package.json` routes all `/api` calls
 
 ---
 
-## 🔐 Demo Credentials
-
-| Role    | Email                  | Password     |
-|---------|------------------------|--------------|
-| Citizen | victor@example.com     | password123  |
-| Admin   | admin@govtrack.ke      | admin2026    |
-
----
-
 ## 🛠 Tech Stack (MERN)
 
 | Layer     | Technology               |
